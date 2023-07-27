@@ -65,8 +65,23 @@ class BlogController extends ApiController
         }
     }
 
-    public function update() {
+    public function update(BlogRequest $request) {
         try {
+
+             $id = $request->id;
+             $params = $request->validated();
+            if(empty($id)) {
+                throw new Exception("No blog found.");
+            }
+            $blog = Blog::where("id", $id)->where("user_id", auth()->user()->id)->first();
+            if(empty($blog)) {
+                throw new Exception("No blog found.");
+            }
+            if(!empty($request->file("image"))) {
+                $params["image"] = $request->file("image")->store(self::IMAGE_PATH, "public");
+            }
+            $blog->update($params);
+            return $this->getSuccessResponse(["message" => "Blog updated."]);
 
         } catch (Exception $e) {
             return $this->getFailureResponse($e->getMessage());
@@ -76,7 +91,7 @@ class BlogController extends ApiController
     public function getUserBlogs() {
         try {
 
-            $blogs = Blog::where("user_id", auth()->user()->id)->with("user:id,name")->get();
+            $blogs = Blog::where("user_id", auth()->user()->id)->with("user:id,name")->paginate(2);
             return $this->getSuccessResponse(["blogs" => $blogs]);
 
         } catch (Exception $e) {
@@ -87,7 +102,7 @@ class BlogController extends ApiController
     public function getAllBlogs() {
         try {
 
-            $blogs = Blog::with("user:id,name")->get();
+            $blogs = Blog::with("user:id,name")->paginate(5);
             return $this->getSuccessResponse(["blogs" => $blogs]);
 
         } catch (Exception $e) {

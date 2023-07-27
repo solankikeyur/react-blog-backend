@@ -39,7 +39,7 @@ Route::middleware("auth:api")->group(function () {
     //Blog Routes
     Route::prefix("blog")->group(function () {
         Route::post("add", [BlogController::class, "add"])->name("blog.add");
-        Route::post("update", [BlogController::class, "update"])->name("blog.update");
+        Route::post("update/{id}", [BlogController::class, "update"])->name("blog.update");
         Route::delete("delete/{id}", [BlogController::class, "delete"])->name("blog.delete");
         Route::get("getUserBlogs", [BlogController::class, "getUserBlogs"])->name("blog.get_user_blogs");
     });
